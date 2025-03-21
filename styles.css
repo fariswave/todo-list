@@ -1,12 +1,14 @@
-/* * {
-    border: 1px solid red;
-} */
+* {
+    /* border: 1px solid red; */
+    box-sizing: border-box;
+}
 
+/* Header Styles */
 .header {
     display: flex;
     justify-content: space-between;
-    flex-flow: row nowrap;
-    position: -webkit-sticky; /* For Safari */
+    width: 100%;
+    align-items: center;
     position: sticky;
     padding: 0;
     z-index: 1000;
@@ -14,23 +16,46 @@
     border-bottom: 1px solid #ccc;
 }
 
-.header > div {
+.header-main {
+    flex: 1;
     display: flex;
+    justify-content: flex-start;
     align-items: center;
-    flex-direction: row;
+    gap: 30px;
 }
 
+.menu-button {
+    font-size: 1.5rem;
+    padding: 14px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.menu-button:hover {
+    color: #007BFF; /* Change to your desired hover color */
+}
+
+.title {
+    font-weight: 700;
+    font-style: normal;
+    font-size: 1.7rem;
+}
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+/* Navigation Styles */
 .header nav ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: space-around;
     font-weight: 500;
-}
-
-.header nav ul li {
-    display: inline;
 }
 
 .header nav ul li a {
@@ -44,23 +69,10 @@
     cursor: pointer;
 }
 
-.menu-button {
-    font-size: 1.5rem;
-    padding: 14px 20px;
-}
-
-.title {
-    font-weight: 700;
-    font-style: normal;
-    font-size: 1.7rem;
-}
-
-.nav-menu {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.nav-menu ul {
-    margin: 0 10px;
+/* Search Bar Styles */
+.search-bar {
+    height: 30px; 
+    border-radius: 15px;
+    margin: 0;
+    font-size: 1rem;
 }
