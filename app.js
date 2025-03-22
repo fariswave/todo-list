@@ -6,9 +6,11 @@ const signoutButton = document.querySelector('#signoutButton');
 const newTodoInput = document.querySelector('#newTodoInput');
 const importButton = document.querySelector('#importButton');
 const todoContainer = document.querySelector('.todoContainer');
+const alert = document.querySelector('#alert');
 
 newTodoInput.addEventListener('focus', showTodoButton);
 newTodoInput.addEventListener('blur', hideTodoButton);
+newTodoInput.value = '';
 
 let todoList = JSON.parse(localStorage.getItem("todoList"));
 if (!todoList) {
@@ -123,7 +125,40 @@ function hideTodoButton() {
 }
 
 function addTodo() {
-    console.log(newTodoInput.value);
+    if (!newTodoInput.value) {
+        todoAlert("Please input a title");
+        newTodoInput.focus();
+    } else {
+        let newTodo = {
+            id: Date.now(),
+            title: newTodoInput.value,
+            items: [],
+            subItems: []
+        };
+        todoList.push(newTodo);
+        setLocalStorage();
+        let todoCard = createTodoCard(newTodo.title, newTodo.items);
+        todoContainer.appendChild(todoCard);
+        newTodoInput.value = '';
+        setAlertMessage("Todo added successfully");
+        hideTodoButton();
+    }
+}
+
+function setAlertMessage(message) {
+    let alertWrapper = document.createElement('div');
+    alertWrapper.id = 'alertWrapper';
+    let alertMessage = document.createElement('p');
+    alertMessage.innerText = message;
+    alertWrapper.appendChild(alertMessage);
+    document.querySelector('main').prepend(alertWrapper);
+    setTimeout(() => {
+        alertWrapper.remove();
+    }, 2000);
+}
+
+function setLocalStorage() {
+    localStorage.setItem("todoList", JSON.stringify(todoList));
 }
 
 renderTodo();
