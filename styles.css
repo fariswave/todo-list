@@ -94,7 +94,9 @@
 #newTodoInput {
     border: 2px solid #ccc;
     border-radius: 10px;
-    padding: 0.5rem 15rem 0.5rem 1rem;
+    padding: 0.5rem;
+    width: 100%;
+    max-width: 600px;
 }
 
 #importButton, #addTodoButton {
@@ -138,11 +140,6 @@
     list-style-type: none;
     padding: 0;
 }
-
-.todoItems li {
-    margin: 4px 0;
-}
-
 #alertWrapper {
     display: flex;
     align-items: center;
@@ -154,4 +151,11 @@
 #alertWrapper p {
     padding: 0;
     margin: 0;
+}
+
+.task {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    line-height: 0.3; /* Add this line to reduce the height */
 }

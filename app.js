@@ -91,19 +91,37 @@ function createTodoCard(title, items) {
 
     todoTitle.innerText = title;
 
-    items.forEach(element => {
-        let li = document.createElement("li");
-        let listContent = document.createElement("p");
-        listContent.innerText = element.text;
-        li.appendChild(listContent);
-        todoItems.appendChild(li);
-    });
+    
 
     todoCard.appendChild(todoTitle);
+    todoItems.appendChild(createTask(items));
     todoCard.appendChild(todoItems);
 
     return todoCard;
 };
+
+function createTask (items) {
+    let li = document.createElement("li");
+    
+    items.forEach(element => {
+        let task = document.createElement("div");
+        let taskName = document.createElement("p");
+        let checkbox = document.createElement("i");
+        
+        if (element.completed) {
+            checkbox.classList.add("fa-regular", "fa-square");
+        } else {
+            checkbox.classList.add("fa-regular", "fa-square-check");
+        }
+        task.classList.add("task");
+        taskName.innerText = element.text;
+        task.appendChild(checkbox);
+        task.appendChild(taskName);
+        li.appendChild(task);
+    });
+
+    return li;
+}
 
 function showTodoButton() {
     let addTodoButton = document.createElement("button");
@@ -133,7 +151,6 @@ function addTodo() {
             id: Date.now(),
             title: newTodoInput.value,
             items: [],
-            subItems: []
         };
         todoList.push(newTodo);
         setLocalStorage();
