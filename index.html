@@ -11,30 +11,29 @@
 </head>
 <body>
     <header id="header">
-        <div id="header-main">
-            <button id="menu-button">
+        <div id="headerMain">
+            <button id="menuButton">
                 <i class="fa-solid fa-bars"></i>
             </button>
             <h1 id="title">Todo List</h1> 
-            <input type="text" class="search-bar" placeholder="Search...">   
+            <input type="text" class="searchBar" placeholder="Search...">   
         </div>
-        <nav class="nav-menu">
+        <nav class="navMenu">
             <ul>
-                <li><a>Import All</a></li>
-                <li><a>Export All</a></li>
-                <li><a>Sign Out</a></li>
+                <li><a id="importAllButton">Import All</a></li>
+                <li><a id="exportAllButton">Export All</a></li>
+                <li><a id="signoutButton">Sign Out</a></li>
             </ul>
         </nav>
-        
     </header>
     <main>
-        <div class="new-todo">
-            <input type="text" id="new-todo-input" placeholder="Add a new todo">
-            <button class="import-button">Import</button>
+        <div class="newTodo">
+            <input type="text" id="newTodoInput" placeholder="Add a new todo">
+            <button class="importButton">Import</button>
         </div>
-        <div class="todo-container"></div>
+        <div class="todoContainer"></div>
     </main>
     <script src="https://kit.fontawesome.com/e275b30975.js" crossorigin="anonymous"></script>
-    <script src="app.js"></script>
+    <script type='module' src="app.js"></script>
 </body>
 </html>

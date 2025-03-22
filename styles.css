@@ -1,6 +1,7 @@
 * {
     /* border: 1px solid red; */
     box-sizing: border-box;
+    font-family: "Poppins", sans-serif; /* Declare font-family once here */
 }
 
 /* Header Styles */
@@ -12,11 +13,10 @@
     position: sticky;
     padding: 0;
     z-index: 1000;
-    font-family: "Poppins", sans-serif;
     border-bottom: 1px solid #ccc;
 }
 
-#header-main {
+#headerMain {
     flex: 1;
     display: flex;
     justify-content: flex-start;
@@ -24,7 +24,7 @@
     gap: 1.8rem;
 }
 
-#menu-button {
+#menuButton {
     font-size: 1.5rem;
     padding: 0.8rem 1.2rem;
     background: none;
@@ -32,7 +32,7 @@
     cursor: pointer;
 }
 
-#menu-button:hover {
+#menuButton:hover {
     color: #007BFF; /* Change to your desired hover color */
 }
 
@@ -42,7 +42,7 @@
     font-size: 1.7rem;
 }
 
-.nav-menu {
+.navMenu {
     display: flex;
     align-items: center;
     flex: 1;
@@ -70,7 +70,7 @@
 }
 
 /* Search Bar Styles */
-.search-bar {
+.searchBar {
     /* height: 1.8rem;  */
     border-radius: 10px;
     margin: 0;
@@ -79,7 +79,7 @@
     border: 2px solid #ccc;
 }
 
-.new-todo {
+.newTodo {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -87,17 +87,58 @@
     gap: 1rem;
 }
 
-.new-todo * {
+.newTodo * {
     font-size: 1rem;
 }
 
-#new-todo-input {
+#newTodoInput {
     border: 2px solid #ccc;
     border-radius: 10px;
     padding: 0.5rem 15rem 0.5rem 1rem;
 }
 
-.import-button {
+.importButton {
     height: 2.5rem; /* Adjust the height to match the input field */
     border-radius: 10px;
+}
+
+#signoutButton {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#signoutButton:hover {
+    color: black;
+}
+
+.todoContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 20rem); /* 4 columns with fixed width */
+    grid-auto-rows: minmax(16rem, auto); /* Set minimum row height to 16rem */
+    gap: 16px;
+    justify-content: center;
+}
+
+.todocard {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.todoTitle {
+    margin: 0 0 8px 0;
+}
+
+.todoItems {
+    list-style-type: none;
+    padding: 0;
+}
+
+.todoItems li {
+    margin: 4px 0;
 }
