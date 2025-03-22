@@ -4,8 +4,11 @@ const importAllButton = document.querySelector('#importAllButton');
 const exportAllButton = document.querySelector('#exportAllButton');
 const signoutButton = document.querySelector('#signoutButton');
 const newTodoInput = document.querySelector('#newTodoInput');
-const importButton = document.querySelector('.importButton');
+const importButton = document.querySelector('#importButton');
 const todoContainer = document.querySelector('.todoContainer');
+
+newTodoInput.addEventListener('focus', showTodoButton);
+newTodoInput.addEventListener('blur', hideTodoButton);
 
 let todoList = JSON.parse(localStorage.getItem("todoList"));
 if (!todoList) {
@@ -99,6 +102,29 @@ function createTodoCard(title, items) {
 
     return todoCard;
 };
+
+function showTodoButton() {
+    let addTodoButton = document.createElement("button");
+    addTodoButton.innerText = 'Add todo';
+    addTodoButton.id = 'addTodoButton';
+    addTodoButton.addEventListener('click', addTodo)
+    let newTodo = document.querySelector('.newTodo');
+    let importButton = document.querySelector('#importButton');
+    if (!newTodoInput.value) {
+        newTodo.insertBefore(addTodoButton, importButton);
+    }
+}
+
+function hideTodoButton() {
+    let addTodoButton = document.querySelector('#addTodoButton');
+    if (!newTodoInput.value) {
+        addTodoButton.remove();
+    }
+}
+
+function addTodo() {
+    console.log(newTodoInput.value);
+}
 
 renderTodo();
 
