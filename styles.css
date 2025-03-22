@@ -4,7 +4,7 @@
 }
 
 /* Header Styles */
-.header {
+#header {
     display: flex;
     justify-content: space-between;
     width: 100%;
@@ -16,27 +16,27 @@
     border-bottom: 1px solid #ccc;
 }
 
-.header-main {
+#header-main {
     flex: 1;
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 30px;
+    gap: 1.8rem;
 }
 
-.menu-button {
+#menu-button {
     font-size: 1.5rem;
-    padding: 14px 20px;
+    padding: 0.8rem 1.2rem;
     background: none;
     border: none;
     cursor: pointer;
 }
 
-.menu-button:hover {
+#menu-button:hover {
     color: #007BFF; /* Change to your desired hover color */
 }
 
-.title {
+#title {
     font-weight: 700;
     font-style: normal;
     font-size: 1.7rem;
@@ -50,7 +50,7 @@
 }
 
 /* Navigation Styles */
-.header nav ul {
+#header nav ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -58,21 +58,46 @@
     font-weight: 500;
 }
 
-.header nav ul li a {
+#header nav ul li a {
     text-decoration: none;
-    padding: 14px 20px;
+    padding: 0.8rem 1.2rem;
     display: block;
 }
 
-.header nav ul li a:hover {
+#header nav ul li a:hover {
     background-color: #e0e0e0;
     cursor: pointer;
 }
 
 /* Search Bar Styles */
 .search-bar {
-    height: 30px; 
-    border-radius: 15px;
+    /* height: 1.8rem;  */
+    border-radius: 10px;
     margin: 0;
     font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid #ccc;
+}
+
+.new-todo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+    gap: 1rem;
+}
+
+.new-todo * {
+    font-size: 1rem;
+}
+
+#new-todo-input {
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    padding: 0.5rem 15rem 0.5rem 1rem;
+}
+
+.import-button {
+    height: 2.5rem; /* Adjust the height to match the input field */
+    border-radius: 10px;
 }
