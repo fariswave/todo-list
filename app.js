@@ -109,9 +109,9 @@ function createTask(items) {
         let checkbox = document.createElement("i");
 
         if (element.completed) {
-            checkbox.classList.add("fa-regular", "fa-square");
-        } else {
             checkbox.classList.add("fa-regular", "fa-square-check");
+        } else {
+            checkbox.classList.add("fa-regular", "fa-square");
         }
 
         task.classList.add("task");
@@ -168,6 +168,36 @@ function showTodoPopup(todoCardId) {
     }
 }
 
+function createNewTaskInput(id) {
+    let newTaskInput = document.createElement('input');
+    newTaskInput.placeholder = "Add a new task";
+    newTaskInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            addNewTask(id, newTaskInput.value);
+            newTaskInput.focus();
+        }
+    });
+    return newTaskInput;
+}
+
+function addNewTask(id, newTask) {
+    todoList.forEach((element) => {
+        let newId = id;
+        if (element.id == id) {
+            element.items.push({
+                id: Date.now(),
+                text: newTask,
+                completed: false
+            });
+            setLocalStorage();
+            const popupContainer = document.querySelector('.popupContainer');
+            popupContainer.remove();
+            showTodoPopup(id);
+            renderTodo();
+        }
+    })
+}
+
 function createTitle({ todo }) {
     const title = document.createElement('input');
     title.classList.add('todoPopupTitle');
@@ -186,7 +216,6 @@ function createTitle({ todo }) {
 function updateTodoTitle(id, newTitle) {
     todoList.forEach((element) => {
         if (element.id == id) {
-            console.log('match found!');
             element.title = newTitle;
         }
     });
@@ -197,6 +226,7 @@ function updateTodoTitle(id, newTitle) {
 
 function createTaskList({ todo }) {
     const itemList = document.createElement('ul');
+    const newTaskInput = createNewTaskInput(todo.id);
 
     if (todo.items.length > 0) {
         todo.items.forEach(item => {
@@ -209,6 +239,7 @@ function createTaskList({ todo }) {
         itemList.appendChild(noTasksMessage);
     }
 
+    itemList.appendChild(newTaskInput);
     return itemList;
 }
 
