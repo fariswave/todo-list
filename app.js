@@ -7,6 +7,8 @@ const newTodoInput = document.querySelector('#newTodoInput');
 const importButton = document.querySelector('#importButton');
 const todoContainer = document.querySelector('.todoContainer');
 const alert = document.querySelector('#alert');
+const body = document.querySelector('body');
+
 
 newTodoInput.addEventListener('focus', showTodoButton);
 newTodoInput.addEventListener('blur', hideTodoButton);
@@ -76,14 +78,15 @@ if (!todoList) {
 
 function renderTodo() {
     todoList.forEach(element => {
-        let todoCard = createTodoCard(element.title, element.items);
+        let todoCard = createTodoCard(element.id, element.title, element.items);
         todoContainer.appendChild(todoCard);
     });    
 }
 
-function createTodoCard(title, items) {
+function createTodoCard(id, title, items) {
     let todoCard = document.createElement("div");
-    todoCard.classList.add("todocard");
+    todoCard.classList.add("todoCard");
+    todoCard.id = id;
     let todoTitle = document.createElement("h3");
     todoTitle.classList.add("todoTitle");
     let todoItems = document.createElement("ul");
@@ -102,7 +105,7 @@ function createTodoCard(title, items) {
 
 function createTask (items) {
     let li = document.createElement("li");
-    
+
     items.forEach(element => {
         let task = document.createElement("div");
         let taskName = document.createElement("p");
@@ -154,7 +157,7 @@ function addTodo() {
         };
         todoList.push(newTodo);
         setLocalStorage();
-        let todoCard = createTodoCard(newTodo.title, newTodo.items);
+        let todoCard = createTodoCard(newTodo.id, newTodo.title, newTodo.items);
         todoContainer.appendChild(todoCard);
         newTodoInput.value = '';
         setAlertMessage("Todo added successfully");
@@ -179,4 +182,70 @@ function setLocalStorage() {
 }
 
 renderTodo();
+
+function showTodoPopup(todoCardId) {
+    // Find the matching todo in the todoList
+    const todo = todoList.find(element => element.id === parseInt(todoCardId));
+    
+    if (todo) {
+        // Create the popup container
+        const popupContainer = document.createElement('div');
+        popupContainer.classList.add('popupContainer');
+        
+        // Create the popup content
+        const popupContent = document.createElement('div');
+        popupContent.classList.add('popupContent');
+        
+        // Create the title element
+        const title = document.createElement('h3');
+        title.innerText = todo.title;
+        popupContent.appendChild(title);
+        
+        // Create the task list
+        const itemList = document.createElement('ul');
+        if (todo.items.length > 0) {
+            todo.items.forEach(item => {
+                const task = createTask([item]);
+                itemList.appendChild(task);
+            });
+        } else {
+            const noTasksMessage = document.createElement('p');
+            noTasksMessage.innerText = 'No tasks available';
+            itemList.appendChild(noTasksMessage);
+        }
+        popupContent.appendChild(itemList);
+        
+        // Create the close button
+        const closeButton = document.createElement('button');
+        closeButton.innerText = 'Close';
+        closeButton.addEventListener('click', () => {
+            popupContainer.remove();
+        });
+        popupContent.appendChild(closeButton);
+        
+        // Append the content to the container
+        popupContainer.appendChild(popupContent);
+        
+        // Append the container to the body
+        document.body.appendChild(popupContainer);
+    }
+}
+
+// Add event listener to todoContainer to handle clicks on todoCards
+todoContainer.addEventListener('click', (event) => {
+    let target = event.target;
+    while (target && !target.classList.contains('todoCard')) {
+        target = target.parentElement;
+    }
+    if (target && target.classList.contains('todoCard')) {
+        const todoCardId = target.id;
+        showTodoPopup(todoCardId);
+    }
+});
+
+
+
+
+
+
 
