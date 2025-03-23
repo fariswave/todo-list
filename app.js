@@ -1,3 +1,6 @@
+// ======================
+// 1. Deklarasi Variabel dan Selektor DOM
+// ======================
 const menuButton = document.querySelector('#menuButton');
 const searchBar = document.querySelector('.searchBar');
 const importAllButton = document.querySelector('#importAllButton');
@@ -9,160 +12,41 @@ const todoContainer = document.querySelector('.todoContainer');
 const alert = document.querySelector('#alert');
 const body = document.querySelector('body');
 
-
-newTodoInput.addEventListener('focus', showTodoButton);
-newTodoInput.addEventListener('blur', hideTodoButton);
-newTodoInput.value = '';
-
-let todoList = JSON.parse(localStorage.getItem("todoList"));
-if (!todoList) {
-    todoList = [
-        {
-            id: 1,
-            title: "Work",
-            items: [
-                { id: 1, text: "Finish report", completed: false },
-                { id: 2, text: "Email client", completed: true }
-            ]
-        },
-        {
-            id: 2,
-            title: "Home",
-            items: [
-                { id: 1, text: "Clean kitchen", completed: false },
-                { id: 2, text: "Mow lawn", completed: false }
-            ]
-        },
-        {
-            id: 3,
-            title: "Shopping",
-            items: [
-                { id: 1, text: "Buy milk", completed: true },
-                { id: 2, text: "Get bread", completed: false }
-            ]
-        },
-        {
-            id: 3,
-            title: "Shopping",
-            items: [
-                { id: 1, text: "Buy milk", completed: true },
-                { id: 2, text: "Get bread", completed: false }
-            ]
-        },
-        {
-            id: 3,
-            title: "Shopping",
-            items: [
-                { id: 1, text: "Buy milk", completed: true },
-                { id: 2, text: "Get bread", completed: false }
-            ]
-        },
-        {
-            id: 3,
-            title: "Shopping",
-            items: [
-                { id: 1, text: "Buy milk", completed: true },
-                { id: 2, text: "Get bread", completed: false }
-            ]
-        },
-        {
-            id: 3,
-            title: "Shopping",
-            items: [
-                { id: 1, text: "Buy milk", completed: true },
-                { id: 2, text: "Get bread", completed: false }
-            ]
-        }
-    ];
-};
-
-function renderTodo() {
-    todoList.forEach(element => {
-        let todoCard = createTodoCard(element.id, element.title, element.items);
-        todoContainer.appendChild(todoCard);
-    });    
-}
-
-function createTodoCard(id, title, items) {
-    let todoCard = document.createElement("div");
-    todoCard.classList.add("todoCard");
-    todoCard.id = id;
-    let todoTitle = document.createElement("h3");
-    todoTitle.classList.add("todoTitle");
-    let todoItems = document.createElement("ul");
-    todoItems.classList.add("todoItems");
-
-    todoTitle.innerText = title;
-
-    
-
-    todoCard.appendChild(todoTitle);
-    todoItems.appendChild(createTask(items));
-    todoCard.appendChild(todoItems);
-
-    return todoCard;
-};
-
-function createTask (items) {
-    let li = document.createElement("li");
-
-    items.forEach(element => {
-        let task = document.createElement("div");
-        let taskName = document.createElement("p");
-        let checkbox = document.createElement("i");
-        
-        if (element.completed) {
-            checkbox.classList.add("fa-regular", "fa-square");
-        } else {
-            checkbox.classList.add("fa-regular", "fa-square-check");
-        }
-        task.classList.add("task");
-        taskName.innerText = element.text;
-        task.appendChild(checkbox);
-        task.appendChild(taskName);
-        li.appendChild(task);
-    });
-
-    return li;
-}
-
-function showTodoButton() {
-    let addTodoButton = document.createElement("button");
-    addTodoButton.innerText = 'Add todo';
-    addTodoButton.id = 'addTodoButton';
-    addTodoButton.addEventListener('click', addTodo)
-    let newTodo = document.querySelector('.newTodo');
-    let importButton = document.querySelector('#importButton');
-    if (!newTodoInput.value) {
-        newTodo.insertBefore(addTodoButton, importButton);
+// ======================
+// 2. Inisialisasi Data
+// ======================
+let todoList = JSON.parse(localStorage.getItem("todoList")) || [
+    {
+        id: 1,
+        title: "Work",
+        items: [
+            { id: 1, text: "Finish report", completed: false },
+            { id: 2, text: "Email client", completed: true }
+        ]
+    },
+    {
+        id: 2,
+        title: "Home",
+        items: [
+            { id: 1, text: "Clean kitchen", completed: false },
+            { id: 2, text: "Mow lawn", completed: false }
+        ]
+    },
+    {
+        id: 3,
+        title: "Shopping",
+        items: [
+            { id: 1, text: "Buy milk", completed: true },
+            { id: 2, text: "Get bread", completed: false }
+        ]
     }
-}
+];
 
-function hideTodoButton() {
-    let addTodoButton = document.querySelector('#addTodoButton');
-    if (!newTodoInput.value) {
-        addTodoButton.remove();
-    }
-}
-
-function addTodo() {
-    if (!newTodoInput.value) {
-        todoAlert("Please input a title");
-        newTodoInput.focus();
-    } else {
-        let newTodo = {
-            id: Date.now(),
-            title: newTodoInput.value,
-            items: [],
-        };
-        todoList.push(newTodo);
-        setLocalStorage();
-        let todoCard = createTodoCard(newTodo.id, newTodo.title, newTodo.items);
-        todoContainer.appendChild(todoCard);
-        newTodoInput.value = '';
-        setAlertMessage("Todo added successfully");
-        hideTodoButton();
-    }
+// ======================
+// 3. Fungsi Utilitas
+// ======================
+function setLocalStorage() {
+    localStorage.setItem("todoList", JSON.stringify(todoList));
 }
 
 function setAlertMessage(message) {
@@ -177,58 +61,142 @@ function setAlertMessage(message) {
     }, 2000);
 }
 
-function setLocalStorage() {
-    localStorage.setItem("todoList", JSON.stringify(todoList));
+function findParentByClass(element, className) {
+    let target = element;
+    while (target && !target.classList.contains(className)) {
+        target = target.parentElement;
+    }
+    return target?.classList.contains(className) ? target : null;
 }
 
-renderTodo();
+// ======================
+// 4. Fungsi Utama
+// ======================
+function renderTodo() {
+    todoContainer.innerHTML = ''; // Bersihkan container sebelum render ulang
+    todoList.forEach(element => {
+        let todoCard = createTodoCard(element.id, element.title, element.items);
+        todoContainer.appendChild(todoCard);
+    });
+}
+
+function createTodoCard(id, title, items) {
+    let todoCard = document.createElement("div");
+    todoCard.classList.add("todoCard");
+    todoCard.id = id;
+
+    let todoTitle = document.createElement("h3");
+    todoTitle.classList.add("todoTitle");
+    todoTitle.innerText = title;
+
+    let todoItems = document.createElement("ul");
+    todoItems.classList.add("todoItems");
+    todoItems.appendChild(createTask(items));
+
+    todoCard.appendChild(todoTitle);
+    todoCard.appendChild(todoItems);
+
+    return todoCard;
+}
+
+function createTask(items) {
+    let li = document.createElement("li");
+
+    items.forEach(element => {
+        let task = document.createElement("div");
+        let taskName = document.createElement("p");
+        let checkbox = document.createElement("i");
+
+        if (element.completed) {
+            checkbox.classList.add("fa-regular", "fa-square");
+        } else {
+            checkbox.classList.add("fa-regular", "fa-square-check");
+        }
+
+        task.classList.add("task");
+        taskName.innerText = element.text;
+        task.appendChild(checkbox);
+        task.appendChild(taskName);
+        li.appendChild(task);
+    });
+
+    return li;
+}
+
+function showTodoButton() {
+    let addTodoButton = document.createElement("button");
+    addTodoButton.innerText = 'Add todo';
+    addTodoButton.id = 'addTodoButton';
+    addTodoButton.addEventListener('click', addTodo);
+
+    let newTodo = document.querySelector('.newTodo');
+    let importButton = document.querySelector('#importButton');
+
+    if (!newTodoInput.value) {
+        newTodo.insertBefore(addTodoButton, importButton);
+    }
+}
+
+function hideTodoButton() {
+    let addTodoButton = document.querySelector('#addTodoButton');
+    if (!newTodoInput.value) {
+        addTodoButton.remove();
+    }
+}
+
+function addTodo() {
+    if (!newTodoInput.value) {
+        setAlertMessage("Please input a title");
+        newTodoInput.focus();
+    } else {
+        let newTodo = {
+            id: Date.now(),
+            title: newTodoInput.value,
+            items: [],
+        };
+        todoList.push(newTodo);
+        setLocalStorage();
+        renderTodo(); // Render ulang daftar todo
+        newTodoInput.value = '';
+        setAlertMessage("Todo added successfully");
+        hideTodoButton();
+    }
+}
 
 function showTodoPopup(todoCardId) {
-    // Find the matching todo in the todoList
     const todo = todoList.find(element => element.id === parseInt(todoCardId));
-    
+
     if (todo) {
-        // Create the popup container
         const popupContainer = document.createElement('div');
         popupContainer.classList.add('popupContainer');
-        
-        // Create the popup content
+
         const popupContent = document.createElement('div');
         popupContent.classList.add('popupContent');
         popupContent.id = todoCardId;
-       
+
         popupContainer.addEventListener('click', (event) => {
             if (!popupContent.contains(event.target)) {
                 popupContainer.remove();
             }
         });
-        
-        // Create the title element
-        popupContent.appendChild(createTitle({todo}));
-        
-        // Create the task list
-        const itemList = createTaskList({todo});
-        
-        popupContent.appendChild(itemList);
+
+        popupContent.appendChild(createTitle({ todo }));
+        popupContent.appendChild(createTaskList({ todo }));
         popupContent.appendChild(createPopupButtons());
-        
-        // Append the content to the container
+
         popupContainer.appendChild(popupContent);
-        
-        // Append the container to the body
         document.body.appendChild(popupContainer);
     }
 }
 
-function createTitle({todo}) {
+function createTitle({ todo }) {
     const title = document.createElement('input');
     title.classList.add('todoPopupTitle');
     title.value = todo.title;
-
     return title;
 }
 
-function createTaskList({todo}) {
+function createTaskList({ todo }) {
     const itemList = document.createElement('ul');
 
     if (todo.items.length > 0) {
@@ -240,19 +208,19 @@ function createTaskList({todo}) {
         const noTasksMessage = document.createElement('p');
         noTasksMessage.innerText = 'No tasks available';
         itemList.appendChild(noTasksMessage);
-    };
+    }
 
     return itemList;
 }
 
 function createPopupButtons() {
     const buttonContainer = document.createElement('div');
-    
-    const importPopupButton = document.createElement('button'); 
+
+    const importPopupButton = document.createElement('button');
     importPopupButton.innerText = 'Import';
     buttonContainer.appendChild(importPopupButton);
 
-    const exportPopupButton = document.createElement('button'); 
+    const exportPopupButton = document.createElement('button');
     exportPopupButton.innerText = 'Export';
     buttonContainer.appendChild(exportPopupButton);
 
@@ -264,41 +232,17 @@ function createPopupButtons() {
     const closeButton = document.createElement('button');
     closeButton.innerText = 'Close';
     closeButton.addEventListener('click', (event) => {
-        let target = event.target;
-        while (target && !target.classList.contains('popupContainer')) {
-            target = target.parentElement;
-        }
-        if (target && target.classList.contains('popupContainer')) {
-            target.remove();
-        }
+        const targetParent = findParentByClass(event.target, 'popupContainer');
+        targetParent.remove();
     });
     buttonContainer.appendChild(closeButton);
 
     return buttonContainer;
 }
 
-// Add event listener to todoContainer to handle clicks on todoCards
-todoContainer.addEventListener('click', (event) => {
-    let target = event.target;
-    while (target && !target.classList.contains('todoCard')) {
-        target = target.parentElement;
-    }
-    if (target && target.classList.contains('todoCard')) {
-        const todoCardId = target.id;
-        showTodoPopup(todoCardId);
-    }
-});
-
 function deleteTodo(event) {
-    let target = event.target;
-    let todoId = '';
-    while (target && !target.classList.contains('popupContent')) {
-        target = target.parentElement;
-    }
-    if (target && target.classList.contains('popupContent')) {
-        todoId = target.id;
-    }
-    
+    const targetParent = findParentByClass(event.target, 'popupContent');
+    const todoId = targetParent.id;
     const todoIndex = todoList.findIndex(todo => todo.id == todoId);
 
     if (!confirm("Delete this list?")) {
@@ -307,14 +251,23 @@ function deleteTodo(event) {
         todoList.splice(todoIndex, 1);
         setLocalStorage();
         document.querySelector('.popupContainer').remove();
-        todoContainer.innerHTML = '';
-        renderTodo();
+        renderTodo(); // Render ulang daftar todo setelah menghapus
     }
-};
+}
 
+// ======================
+// 5. Event Listener dan Inisialisasi Aplikasi
+// ======================
+newTodoInput.addEventListener('focus', showTodoButton);
+newTodoInput.addEventListener('blur', hideTodoButton);
+newTodoInput.value = '';
 
+todoContainer.addEventListener('click', (event) => {
+    const targetParent = findParentByClass(event.target, 'todoCard');
+    if (targetParent) {
+        showTodoPopup(targetParent.id);
+    }
+});
 
-
-
-
-
+// Render todo list saat aplikasi dimuat
+renderTodo();
