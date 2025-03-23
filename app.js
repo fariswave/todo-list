@@ -204,9 +204,7 @@ function showTodoPopup(todoCardId) {
         });
         
         // Create the title element
-        const title = document.createElement('h3');
-        title.innerText = todo.title;
-        popupContent.appendChild(title);
+        popupContent.appendChild(createTitle({todo}));
         
         // Create the task list
         const itemList = createTaskList({todo});
@@ -220,6 +218,14 @@ function showTodoPopup(todoCardId) {
         // Append the container to the body
         document.body.appendChild(popupContainer);
     }
+}
+
+function createTitle({todo}) {
+    const title = document.createElement('input');
+    title.classList.add('todoPopupTitle');
+    title.value = todo.title;
+
+    return title;
 }
 
 function createTaskList({todo}) {
