@@ -191,6 +191,7 @@ function showTodoPopup(todoCardId) {
         // Create the popup container
         const popupContainer = document.createElement('div');
         popupContainer.classList.add('popupContainer');
+        popupContainer.addEventListener('click', () => popupContainer.remove());
         
         // Create the popup content
         const popupContent = document.createElement('div');
@@ -215,13 +216,8 @@ function showTodoPopup(todoCardId) {
         }
         popupContent.appendChild(itemList);
         
-        // Create the close button
-        const closeButton = document.createElement('button');
-        closeButton.innerText = 'Close';
-        closeButton.addEventListener('click', () => {
-            popupContainer.remove();
-        });
-        popupContent.appendChild(closeButton);
+        popupContent.appendChild(createPopupButtons());
+
         
         // Append the content to the container
         popupContainer.appendChild(popupContent);
@@ -229,6 +225,42 @@ function showTodoPopup(todoCardId) {
         // Append the container to the body
         document.body.appendChild(popupContainer);
     }
+}
+
+function removePopup() {
+
+}
+
+function createPopupButtons() {
+    const buttonContainer = document.createElement('div');
+    
+    const importPopupButton = document.createElement('button'); 
+    importPopupButton.innerText = 'Import';
+    buttonContainer.appendChild(importPopupButton);
+
+    const exportPopupButton = document.createElement('button'); 
+    exportPopupButton.innerText = 'Export';
+    buttonContainer.appendChild(exportPopupButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.innerText = 'Delete';
+    deleteButton.addEventListener('click', () => deleteTodo(this));
+    buttonContainer.appendChild(deleteButton);
+
+    const closeButton = document.createElement('button');
+    closeButton.innerText = 'Close';
+    closeButton.addEventListener('click', (event) => {
+        let target = event.target;
+        while (target && !target.classList.contains('popupContainer')) {
+            target = target.parentElement;
+        }
+        if (target && target.classList.contains('popupContainer')) {
+            target.remove();
+        }
+    });
+    buttonContainer.appendChild(closeButton);
+
+    return buttonContainer;
 }
 
 // Add event listener to todoContainer to handle clicks on todoCards
@@ -242,6 +274,10 @@ todoContainer.addEventListener('click', (event) => {
         showTodoPopup(todoCardId);
     }
 });
+
+function deleteTodo(i) {
+    console.log(i);
+}
 
 
 
