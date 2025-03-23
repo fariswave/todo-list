@@ -191,11 +191,17 @@ function showTodoPopup(todoCardId) {
         // Create the popup container
         const popupContainer = document.createElement('div');
         popupContainer.classList.add('popupContainer');
-        popupContainer.addEventListener('click', () => popupContainer.remove());
         
         // Create the popup content
         const popupContent = document.createElement('div');
         popupContent.classList.add('popupContent');
+        popupContent.id = todoCardId;
+       
+        popupContainer.addEventListener('click', (event) => {
+            if (!popupContent.contains(event.target)) {
+                popupContainer.remove();
+            }
+        });
         
         // Create the title element
         const title = document.createElement('h3');
@@ -203,21 +209,10 @@ function showTodoPopup(todoCardId) {
         popupContent.appendChild(title);
         
         // Create the task list
-        const itemList = document.createElement('ul');
-        if (todo.items.length > 0) {
-            todo.items.forEach(item => {
-                const task = createTask([item]);
-                itemList.appendChild(task);
-            });
-        } else {
-            const noTasksMessage = document.createElement('p');
-            noTasksMessage.innerText = 'No tasks available';
-            itemList.appendChild(noTasksMessage);
-        }
-        popupContent.appendChild(itemList);
+        const itemList = createTaskList({todo});
         
+        popupContent.appendChild(itemList);
         popupContent.appendChild(createPopupButtons());
-
         
         // Append the content to the container
         popupContainer.appendChild(popupContent);
@@ -227,8 +222,21 @@ function showTodoPopup(todoCardId) {
     }
 }
 
-function removePopup() {
+function createTaskList({todo}) {
+    const itemList = document.createElement('ul');
 
+    if (todo.items.length > 0) {
+        todo.items.forEach(item => {
+            const task = createTask([item]);
+            itemList.appendChild(task);
+        });
+    } else {
+        const noTasksMessage = document.createElement('p');
+        noTasksMessage.innerText = 'No tasks available';
+        itemList.appendChild(noTasksMessage);
+    };
+
+    return itemList;
 }
 
 function createPopupButtons() {
@@ -244,7 +252,7 @@ function createPopupButtons() {
 
     const deleteButton = document.createElement('button');
     deleteButton.innerText = 'Delete';
-    deleteButton.addEventListener('click', () => deleteTodo(this));
+    deleteButton.addEventListener('click', (event) => deleteTodo(event));
     buttonContainer.appendChild(deleteButton);
 
     const closeButton = document.createElement('button');
@@ -275,9 +283,28 @@ todoContainer.addEventListener('click', (event) => {
     }
 });
 
-function deleteTodo(i) {
-    console.log(i);
-}
+function deleteTodo(event) {
+    let target = event.target;
+    let todoId = '';
+    while (target && !target.classList.contains('popupContent')) {
+        target = target.parentElement;
+    }
+    if (target && target.classList.contains('popupContent')) {
+        todoId = target.id;
+    }
+    
+    const todoIndex = todoList.findIndex(todo => todo.id == todoId);
+
+    if (!confirm("Delete this list?")) {
+        showTodoPopup(todoId);
+    } else {
+        todoList.splice(todoIndex, 1);
+        setLocalStorage();
+        document.querySelector('.popupContainer').remove();
+        todoContainer.innerHTML = '';
+        renderTodo();
+    }
+};
 
 
 
