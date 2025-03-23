@@ -7,6 +7,7 @@ const importAllButton = document.querySelector('#importAllButton');
 const exportAllButton = document.querySelector('#exportAllButton');
 const signoutButton = document.querySelector('#signoutButton');
 const newTodoInput = document.querySelector('#newTodoInput');
+const addTodoButton = document.querySelector('#addTodoButton');
 const importButton = document.querySelector('#importButton');
 const todoContainer = document.querySelector('.todoContainer');
 const alert = document.querySelector('#alert');
@@ -76,7 +77,7 @@ function renderTodo() {
     todoContainer.innerHTML = ''; // Bersihkan container sebelum render ulang
     todoList.forEach(element => {
         let todoCard = createTodoCard(element.id, element.title, element.items);
-        todoContainer.appendChild(todoCard);
+        todoContainer.prepend(todoCard);
     });
 }
 
@@ -123,27 +124,6 @@ function createTask(items) {
     return li;
 }
 
-function showTodoButton() {
-    let addTodoButton = document.createElement("button");
-    addTodoButton.innerText = 'Add todo';
-    addTodoButton.id = 'addTodoButton';
-    addTodoButton.addEventListener('click', addTodo);
-
-    let newTodo = document.querySelector('.newTodo');
-    let importButton = document.querySelector('#importButton');
-
-    if (!newTodoInput.value) {
-        newTodo.insertBefore(addTodoButton, importButton);
-    }
-}
-
-function hideTodoButton() {
-    let addTodoButton = document.querySelector('#addTodoButton');
-    if (!newTodoInput.value) {
-        addTodoButton.remove();
-    }
-}
-
 function addTodo() {
     if (!newTodoInput.value) {
         setAlertMessage("Please input a title");
@@ -156,10 +136,9 @@ function addTodo() {
         };
         todoList.push(newTodo);
         setLocalStorage();
+        showTodoPopup(newTodo.id);
         renderTodo(); // Render ulang daftar todo
         newTodoInput.value = '';
-        setAlertMessage("Todo added successfully");
-        hideTodoButton();
     }
 }
 
@@ -214,9 +193,6 @@ function updateTodoTitle(id, newTitle) {
     
     setLocalStorage();
     renderTodo();
-    // console.log(todoList.title);
-
-    // showTodoPopup(id);
 };
 
 function createTaskList({ todo }) {
@@ -281,8 +257,14 @@ function deleteTodo(event) {
 // ======================
 // 5. Event Listener dan Inisialisasi Aplikasi
 // ======================
-newTodoInput.addEventListener('focus', showTodoButton);
-newTodoInput.addEventListener('blur', hideTodoButton);
+
+newTodoInput.addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+        addTodo();
+        showTodoPopup(); // Remove focus from the input field
+    }
+});
+addTodoButton.addEventListener('click', addTodo);
 newTodoInput.value = '';
 
 todoContainer.addEventListener('click', (event) => {
