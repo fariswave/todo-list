@@ -193,8 +193,31 @@ function createTitle({ todo }) {
     const title = document.createElement('input');
     title.classList.add('todoPopupTitle');
     title.value = todo.title;
+    title.addEventListener('blur', () => updateTodoTitle(todo.id, title.value)); 
+    title.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            updateTodoTitle(todo.id, title.value);
+            title.blur(); // Remove focus from the input field
+        }
+    });
+
     return title;
 }
+
+function updateTodoTitle(id, newTitle) {
+    todoList.forEach((element) => {
+        if (element.id == id) {
+            console.log('match found!');
+            element.title = newTitle;
+        }
+    });
+    
+    setLocalStorage();
+    renderTodo();
+    // console.log(todoList.title);
+
+    // showTodoPopup(id);
+};
 
 function createTaskList({ todo }) {
     const itemList = document.createElement('ul');
