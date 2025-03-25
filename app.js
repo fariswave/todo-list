@@ -220,26 +220,38 @@ function addTodo() {
  * @returns {void} Tidak mengembalikan apa-apa.
  */
 function showTodoPopup(todoCardId) {
-    const todo = todoList.find(element => element.id === parseInt(todoCardId));
+    const todo = todoList.find(({ id }) => id === parseInt(todoCardId));
 
     if (todo) {
         const popupContainer = document.createElement('div');
-        popupContainer.classList.add('popupContainer');
+        popupContainer.className = 'popupContainer';
 
         const popupContent = document.createElement('div');
-        popupContent.classList.add('popupContent');
+        popupContent.className = 'popupContent';
         popupContent.id = todoCardId;
 
-        popupContainer.addEventListener('click', (event) => {
-            if (!popupContent.contains(event.target)) {
+        /**
+         * Menghapus popup yang sedang ditampilkan jika user mengklik
+         * di luar area popup.
+         *
+         * @param {Event} event - Event klik yang terjadi.
+         *
+         * @description Menghapus popup yang sedang ditampilkan jika user
+         *              mengklik di luar area popup. Jika user mengklik di
+         *              dalam area popup, maka tidak terjadi apa-apa.
+         */
+        popupContainer.onclick = ({ target }) => {
+            if (!popupContent.contains(target)) {
                 popupContainer.remove();
             }
-        });
+        };
 
-        popupContent.appendChild(createTitle(todo));
-        popupContent.appendChild(createTaskList(todoCardId, todo.items));
-        popupContent.appendChild(createNewTaskInput(todoCardId));
-        popupContent.appendChild(createPopupButtons());
+        popupContent.append(
+            createTitle(todo),
+            createTaskList(todoCardId, todo.items),
+            createNewTaskInput(todoCardId),
+            createPopupButtons(todoCardId)
+        );
 
         popupContainer.appendChild(popupContent);
 
@@ -259,12 +271,13 @@ function showTodoPopup(todoCardId) {
 function createNewTaskInput(id) {
     let newTaskInput = document.createElement('input');
     newTaskInput.placeholder = "Add a new task";
-    newTaskInput.addEventListener('keyup', (event) => {
+    newTaskInput.onkeyup = (event) => {
         if (event.key === 'Enter') {
             addNewTask(id, newTaskInput.value);
             newTaskInput.focus();
         }
-    });
+    };
+
     return newTaskInput;
 }
 
@@ -355,7 +368,7 @@ function createTaskList(id, itemsArray) {
     const itemList = document.createElement('ul');
     const newTaskInput = createNewTaskInput(id);
 
-    if(itemsArray.length > 0) {
+    if (itemsArray.length > 0) {
         itemsArray.forEach(item => {
             const task = createTask(item);
             itemList.appendChild(task);
@@ -370,59 +383,82 @@ function createTaskList(id, itemsArray) {
 }
 
 /**
- * Creates a container element for buttons in the todo popup.
+ * Creates a container element that holds multiple action buttons for the todo popup.
  *
- * @returns {Element} The container element with the buttons.
+ * @param {number} todoId - The ID of the todo item associated with the popup.
+ *
+ * @returns {Element} A div element containing various action buttons.
  */
-function createPopupButtons() {
+function createPopupButtons(todoId) {
+    // Create a div element to serve as the container for the buttons
     const buttonContainer = document.createElement('div');
 
-    const importPopupButton = document.createElement('button');
-    importPopupButton.innerText = 'Import';
-    buttonContainer.appendChild(importPopupButton);
+    // Define an array of button data, including button text and click event handlers
+    const buttonsData = [
+        { text: 'Import' }, // Button for importing (functionality not implemented)
+        { text: 'Export' }, // Button for exporting (functionality not implemented)
+        { 
+            text: 'Delete', 
+            // The 'Delete' button has an event listener that calls deleteTodo with the provided todoId
+            onClick: () => deleteTodo(todoId) 
+        },
+        { 
+            text: 'Close', 
+            // The 'Close' button has an event listener that removes the popup container from the DOM
+            onClick: () => document.querySelector('.popupContainer').remove() 
+        }
+    ];
 
-    const exportPopupButton = document.createElement('button');
-    exportPopupButton.innerText = 'Export';
-    buttonContainer.appendChild(exportPopupButton);
+    // Iterate over each button data object
+    for (const { text, onClick } of buttonsData) {
+        // Create a button element and append it to the buttonContainer
+        const button = buttonContainer.appendChild(document.createElement('button'));
+        // Set the button's text content to the specified text
+        button.textContent = text;
+        // If an onClick function is provided, add it as a click event listener with passive option
+        onClick && button.addEventListener('click', onClick, { passive: true });
+    }
 
-    const deleteButton = document.createElement('button');
-    deleteButton.innerText = 'Delete';
-    deleteButton.addEventListener('click', (event) => deleteTodo(event));
-    buttonContainer.appendChild(deleteButton);
-
-    const closeButton = document.createElement('button');
-    closeButton.innerText = 'Close';
-    closeButton.addEventListener('click', (event) => {
-        const targetParent = findParentByClass(event.target, 'popupContainer');
-        targetParent.remove();
-    });
-    buttonContainer.appendChild(closeButton);
-
+    // Return the container element with all the buttons
     return buttonContainer;
 }
 
 /**
  * Menghapus todo yang dipilih dan menyimpan perubahan ke local storage.
  *
- * @param {Event} event - Event yang terjadi saat tombol "Delete" diklik.
+ * @param {number} todoId - ID dari todo yang akan dihapus.
  *
  * @description Jika user mengkonfirmasi penghapusan, maka menghapus todo yang dipilih dari daftar todo dan menyimpan perubahan ke local storage.
  *              Kemudian, menghapus popup yang sedang ditampilkan dan menampilkan daftar todo yang diperbarui.
  *              Jika user tidak mengkonfirmasi penghapusan, maka menampilkan popup yang sedang ditampilkan kembali.
  */
-function deleteTodo(event) {
-    const targetParent = findParentByClass(event.target, 'popupContent');
-    const todoId = targetParent.id;
-    const todoIndex = todoList.findIndex(todo => todo.id == todoId);
+function deleteTodo(todoId) {
+    const deletePopup = document.createElement('div');
+    deletePopup.className = 'deletePopup';
+    deletePopup.innerHTML = `
+        <p>Are you sure you want to delete this list?</p>
+        <button class="deleteYes">Yes</button>
+        <button class="deleteNo">No</button>
+    `;
 
-    if (!confirm("Delete this list?")) {
-        showTodoPopup(todoId);
-    } else {
+    document.querySelector('.popupContent').appendChild(deletePopup);
+
+    const yesButton = deletePopup.querySelector('.deleteYes');
+    const noButton = deletePopup.querySelector('.deleteNo');
+
+    yesButton.addEventListener('click', () => {
+        const todoIndex = todoList.findIndex(todo => todo.id === todoId);
         todoList.splice(todoIndex, 1);
         setLocalStorage();
+        // deletePopup.remove();
         document.querySelector('.popupContainer').remove();
         renderTodo(); // Render ulang daftar todo setelah menghapus
-    }
+    });
+
+    noButton.addEventListener('click', () => {
+        document.querySelector('.popupContainer').remove();
+        showTodoPopup(todoId);
+});
 }
 
 // ======================
