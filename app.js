@@ -136,16 +136,15 @@ function createTodoCard(id, title, items) {
  *
  * @returns {Element} Elemen li yang telah dibuat.
  */
-function createTask(items) {
-    console.log("items grabbed by createTask", items);
+function createTask(taskData) {
     let li = document.createElement("li");
     let task = document.createElement("div");
     let taskName = document.createElement("p");
     let checkbox = document.createElement("i");
-    checkbox.id = items.id;
-    checkbox.addEventListener('click', () => toggleTaskCompletion(checkbox.id));
+    checkbox.id = taskData.id;
+    checkbox.addEventListener('click', (event) => toggleTaskCompletion(event.target));
 
-    if (items.completed) {
+    if (taskData.completed) {
         checkbox.classList.add("fa-regular", "fa-square-check");
         taskName.style.textDecoration = "line-through";
     } else {
@@ -153,36 +152,36 @@ function createTask(items) {
     }
 
     task.classList.add("task");
-    taskName.innerText = items.text;
+    taskName.innerText = taskData.text;
     task.appendChild(checkbox);
     task.appendChild(taskName);
     li.appendChild(task);
     return li;
 }
 
+
 /**
- * Mengubah status completed dari sebuah task dalam daftar todo.
+ * Membalikkan status task yang dipilih.
  *
- * @param {number} checkboxId - ID dari checkbox yang akan diubah status completed-nya.
+ * @param {Element} checkboxElement - Elemen checkbox yang diklik.
  *
- * @returns {void} Tidak mengembalikan apa-apa.
+ * @description Membalikkan status task yang dipilih dengan mengubah properti `completed`
+ *              pada objek task yang sesuai. Kemudian, menghapus popup yang sedang
+ *              ditampilkan dan menampilkan daftar todo yang diperbarui.
  */
-function toggleTaskCompletion(checkboxId) {
-    let popupContainerId = '';
-    if (document.querySelector('.popupContainer')) {
-        // console.log("test", checkboxId);
-        for (const todo of todoList) {
-            let popupContainerId = todo.id;
-            for (const task of todo.items) {
-                if (task.id == checkboxId) {
-                    task.completed = !task.completed;
-                    setLocalStorage();
-                    document.querySelector('.popupContainer').remove();
-                    showTodoPopup(popupContainerId);
-                    renderTodo();
-                }
-            }
-        }
+
+function toggleTaskCompletion(checkboxElement) {
+    const todoElement = findParentByClass(checkboxElement, 'popupContent');
+    const popUpContainerElement = findParentByClass(checkboxElement, 'popupContainer');
+    let todoToChange = todoList.find(todo => todo.id == todoElement.id);
+    let taskToToggle = todoToChange.items.find(task => task.id == checkboxElement.id);
+
+    if (taskToToggle) {
+        taskToToggle.completed = !taskToToggle.completed;
+        setLocalStorage();
+        popUpContainerElement.remove();
+        showTodoPopup(todoElement.id);
+        renderTodo();
     }
 };
 
