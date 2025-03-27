@@ -77,7 +77,7 @@ function findParentByClass(element, className) {
 }
 
 // ======================
-// 4. Fungsi Utama
+// 4. Fungsi Utama - Manajemen Todo
 // ======================
 
 /**
@@ -122,6 +122,86 @@ function createTodoCard(id, title, items) {
     todoCard.appendChild(todoItems);
 
     return todoCard;
+}
+
+/**
+ * Searches for todos based on the keyword input in the search bar and displays the results in the todoContainer element.
+ */
+function searchTodo() {
+    // Log the function call for debugging purposes
+    console.log("searchTodo function called");
+
+    // Get the keyword from the search bar, convert it to lowercase for case-insensitive search
+    let keyword = searchBar.value.toLowerCase();
+    console.log("keyword:", keyword);
+
+    // Filter the todo list to find todos that match the keyword in their title or any of their items
+    let result = todoList.filter(todo => {
+        console.log("checking todo:", todo);
+        // Check if the todo title includes the keyword or any item's text includes the keyword
+        return todo.title.toLowerCase().includes(keyword) || 
+               todo.items.some(item => item.text.toLowerCase().includes(keyword));
+    });
+    console.log("result:", result);
+
+    // Clear the todoContainer before rendering the filtered results
+    todoContainer.innerHTML = '';
+
+    // Iterate over each filtered todo and render it
+    result.forEach(element => {
+        console.log("rendering todo:", element);
+        // Create a todo card element using the todo's id, title, and items
+        let todoCard = createTodoCard(element.id, element.title, element.items);
+        // Prepend the newly created todo card to the todoContainer
+        todoContainer.prepend(todoCard);
+    });
+}
+
+/**
+ * Menambahkan todo baru ke dalam daftar todo dan menyimpannya ke local storage.
+ *
+ * @description Jika inputan judul todo tidak kosong, maka membuat objek todo baru dan menambahkannya ke dalam daftar todo.
+ *              Kemudian, menyimpan daftar todo ke dalam local storage dan menampilkan popup untuk mengedit todo yang baru dibuat.
+ *              Jika inputan judul todo kosong, maka menampilkan pesan error dan memberikan fokus pada inputan judul todo.
+ *
+ * @returns {undefined}
+ */
+function addTodo() {
+    if (!newTodoInput.value) {
+        setAlertMessage("Please input a title");
+        newTodoInput.focus();
+    } else {
+        let newTodo = {
+            id: Date.now(),
+            title: newTodoInput.value,
+            items: [],
+        };
+        todoList.push(newTodo);
+        setLocalStorage();
+        showTodoPopup(newTodo.id);
+        renderTodo(); // Render ulang daftar todo
+        newTodoInput.value = '';
+    }
+}
+
+/**
+ * Membuat elemen input untuk menambahkan task baru ke dalam todo yang dipilih.
+ *
+ * @param {number} id - ID dari todo yang akan ditambahkan task baru.
+ *
+ * @returns {Element} Elemen input yang telah dibuat.
+ */
+function createNewTaskInput(id) {
+    let newTaskInput = document.createElement('input');
+    newTaskInput.placeholder = "Add a new task";
+    newTaskInput.onkeyup = (event) => {
+        if (event.key === 'Enter') {
+            newTaskInput.focus();
+            addNewTask(id, newTaskInput.value);
+        }
+    };
+
+    return newTaskInput;
 }
 
 /**
@@ -186,31 +266,87 @@ function toggleTaskCompletion(checkboxElement) {
 };
 
 /**
- * Menambahkan todo baru ke dalam daftar todo dan menyimpannya ke local storage.
+ * Creates an input element for the title of a todo item in the todo popup.
  *
- * @description Jika inputan judul todo tidak kosong, maka membuat objek todo baru dan menambahkannya ke dalam daftar todo.
- *              Kemudian, menyimpan daftar todo ke dalam local storage dan menampilkan popup untuk mengedit todo yang baru dibuat.
- *              Jika inputan judul todo kosong, maka menampilkan pesan error dan memberikan fokus pada inputan judul todo.
+ * @param {Object} todo - The todo item whose title will be displayed in the input element.
  *
- * @returns {undefined}
+ * @description Creates an input element with the todo item's title as its value and adds event listeners to update the todo item's title and remove focus from the input field when the user presses Enter or blurs the input field.
+ *
+ * @returns {Element} The input element with the todo item's title.
  */
-function addTodo() {
-    if (!newTodoInput.value) {
-        setAlertMessage("Please input a title");
-        newTodoInput.focus();
-    } else {
-        let newTodo = {
-            id: Date.now(),
-            title: newTodoInput.value,
-            items: [],
-        };
-        todoList.push(newTodo);
-        setLocalStorage();
-        showTodoPopup(newTodo.id);
-        renderTodo(); // Render ulang daftar todo
-        newTodoInput.value = '';
-    }
+function createTitle(todo) {
+    const title = document.createElement('input');
+    title.classList.add('todoPopupTitle');
+    title.value = todo.title;
+    title.addEventListener('blur', () => updateTodoTitle(todo.id, title.value)); 
+    title.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            updateTodoTitle(todo.id, title.value);
+            title.blur(); // Remove focus from the input field
+        }
+    });
+
+    return title;
 }
+
+/**
+ * Creates an unordered list element for the task list of a todo item in the todo popup.
+ *
+ * @param {Object} todo - The todo item whose task list will be displayed in the unordered list element.
+ *
+ * @description Creates an unordered list element with list items for each task in the todo item's task list and appends a new task input element at the end of the list.
+ *
+ * @returns {Element} The unordered list element with the task list of the todo item.
+ */
+function createTaskList(id, itemsArray) {
+    const itemList = document.createElement('ul');  
+
+    if (itemsArray.length > 0) {
+        itemsArray.forEach(item => {
+            const task = createTask(item);
+            itemList.appendChild(task);
+        });    
+    } else {
+        const noTasksMessage = document.createElement('p');
+        noTasksMessage.innerText = 'No tasks available';
+        itemList.appendChild(noTasksMessage);
+    }
+    
+    return itemList;
+}
+
+function deleteTodo(todoId) {
+    const deletePopup = document.createElement('div');
+    deletePopup.className = 'deletePopup';
+    deletePopup.innerHTML = `
+        <p>Are you sure you want to delete this list?</p>
+        <button class="deleteYes">Yes</button>
+        <button class="deleteNo">No</button>
+    `;
+
+    document.querySelector('.popupContent').appendChild(deletePopup);
+
+    const yesButton = deletePopup.querySelector('.deleteYes');
+    const noButton = deletePopup.querySelector('.deleteNo');
+
+    yesButton.addEventListener('click', () => {
+        const todoIndex = todoList.findIndex(todo => todo.id === todoId);
+        todoList.splice(todoIndex, 1);
+        setLocalStorage();
+        // deletePopup.remove();
+        document.querySelector('.popupContainer').remove();
+        renderTodo(); // Render ulang daftar todo setelah menghapus
+    });
+
+    noButton.addEventListener('click', () => {
+        document.querySelector('.popupContainer').remove();
+        showTodoPopup(todoId);
+});
+}
+
+// ======================
+// 5. FUNGSI POPUP
+// ======================
 
 /**
  * Menampilkan popup untuk mengedit sebuah todo.
@@ -262,127 +398,6 @@ function showTodoPopup(todoCardId) {
 }
 
 /**
- * Membuat elemen input untuk menambahkan task baru ke dalam todo yang dipilih.
- *
- * @param {number} id - ID dari todo yang akan ditambahkan task baru.
- *
- * @returns {Element} Elemen input yang telah dibuat.
- */
-function createNewTaskInput(id) {
-    let newTaskInput = document.createElement('input');
-    newTaskInput.placeholder = "Add a new task";
-    newTaskInput.onkeyup = (event) => {
-        if (event.key === 'Enter') {
-            addNewTask(id, newTaskInput.value);
-            newTaskInput.focus();
-        }
-    };
-
-    return newTaskInput;
-}
-
-/**
- * Adds a new task to the specified todo item and updates the display.
- *
- * @param {number} id - The ID of the todo item to which the new task will be added.
- * @param {string} newTask - The text of the new task to be added.
- *
- * @description Finds the todo item with the given ID, adds a new task to its items list, 
- * stores the updated list in local storage, removes the existing popup, and re-renders the popup and todo list.
- *
- * @returns {void} Does not return anything.
- */
-
-function addNewTask(id, newTask) {
-    todoList.forEach((element) => {
-        let newId = id;
-        if (element.id == id) {
-            element.items.push({
-                id: Date.now(),
-                text: newTask,
-                completed: false
-            });
-            setLocalStorage();
-            const popupContainer = document.querySelector('.popupContainer');
-            popupContainer.remove();
-            showTodoPopup(id);
-            renderTodo();
-        }
-    })
-}
-
-/**
- * Creates an input element for the title of a todo item in the todo popup.
- *
- * @param {Object} todo - The todo item whose title will be displayed in the input element.
- *
- * @description Creates an input element with the todo item's title as its value and adds event listeners to update the todo item's title and remove focus from the input field when the user presses Enter or blurs the input field.
- *
- * @returns {Element} The input element with the todo item's title.
- */
-function createTitle(todo) {
-    const title = document.createElement('input');
-    title.classList.add('todoPopupTitle');
-    title.value = todo.title;
-    title.addEventListener('blur', () => updateTodoTitle(todo.id, title.value)); 
-    title.addEventListener('keyup', (event) => {
-        if (event.key === 'Enter') {
-            updateTodoTitle(todo.id, title.value);
-            title.blur(); // Remove focus from the input field
-        }
-    });
-
-    return title;
-}
-
-/**
- * Updates the title of a todo item in the todo list and re-renders the todo list.
- *
- * @param {number} id - The ID of the todo item to be updated.
- * @param {string} newTitle - The new title of the todo item.
- * 
- * @description Iterates through the todo list and updates the title of the todo item whose ID matches the given ID, saves the updated list to local storage, and re-renders the todo list.
- */
-
-function updateTodoTitle(id, newTitle) {
-    todoList.forEach((element) => {
-        if (element.id == id) {
-            element.title = newTitle;
-        }
-    });
-    
-    setLocalStorage();
-    renderTodo();
-};
-
-/**
- * Creates an unordered list element for the task list of a todo item in the todo popup.
- *
- * @param {Object} todo - The todo item whose task list will be displayed in the unordered list element.
- *
- * @description Creates an unordered list element with list items for each task in the todo item's task list and appends a new task input element at the end of the list.
- *
- * @returns {Element} The unordered list element with the task list of the todo item.
- */
-function createTaskList(id, itemsArray) {
-    const itemList = document.createElement('ul');
-    const newTaskInput = createNewTaskInput(id);
-
-    if (itemsArray.length > 0) {
-        itemsArray.forEach(item => {
-            const task = createTask(item);
-            itemList.appendChild(task);
-        });    
-    } else {
-        const noTasksMessage = document.createElement('p');
-        noTasksMessage.innerText = 'No tasks available';
-        itemList.appendChild(noTasksMessage);
-    }
-    
-    return itemList;
-}
-
-/**
  * Creates a container element that holds multiple action buttons for the todo popup.
  *
  * @param {number} todoId - The ID of the todo item associated with the popup.
@@ -423,6 +438,44 @@ function createPopupButtons(todoId) {
     return buttonContainer;
 }
 
+function addNewTask(id, newTask) {
+    todoList.forEach((element) => {
+        // let newId = id;
+        if (element.id == id) {
+            element.items.push({
+                id: Date.now(),
+                text: newTask,
+                completed: false
+            });
+            setLocalStorage();
+            const popupContainer = document.querySelector('.popupContainer');
+            popupContainer.remove();
+            showTodoPopup(id);
+            renderTodo();
+        }
+    })
+}
+
+/**
+ * Updates the title of a todo item in the todo list and re-renders the todo list.
+ *
+ * @param {number} id - The ID of the todo item to be updated.
+ * @param {string} newTitle - The new title of the todo item.
+ * 
+ * @description Iterates through the todo list and updates the title of the todo item whose ID matches the given ID, saves the updated list to local storage, and re-renders the todo list.
+ */
+
+function updateTodoTitle(id, newTitle) {
+    todoList.forEach((element) => {
+        if (element.id == id) {
+            element.title = newTitle;
+        }
+    });
+    
+    setLocalStorage();
+    renderTodo();
+};
+
 /**
  * Menghapus todo yang dipilih dan menyimpan perubahan ke local storage.
  *
@@ -432,34 +485,7 @@ function createPopupButtons(todoId) {
  *              Kemudian, menghapus popup yang sedang ditampilkan dan menampilkan daftar todo yang diperbarui.
  *              Jika user tidak mengkonfirmasi penghapusan, maka menampilkan popup yang sedang ditampilkan kembali.
  */
-function deleteTodo(todoId) {
-    const deletePopup = document.createElement('div');
-    deletePopup.className = 'deletePopup';
-    deletePopup.innerHTML = `
-        <p>Are you sure you want to delete this list?</p>
-        <button class="deleteYes">Yes</button>
-        <button class="deleteNo">No</button>
-    `;
 
-    document.querySelector('.popupContent').appendChild(deletePopup);
-
-    const yesButton = deletePopup.querySelector('.deleteYes');
-    const noButton = deletePopup.querySelector('.deleteNo');
-
-    yesButton.addEventListener('click', () => {
-        const todoIndex = todoList.findIndex(todo => todo.id === todoId);
-        todoList.splice(todoIndex, 1);
-        setLocalStorage();
-        // deletePopup.remove();
-        document.querySelector('.popupContainer').remove();
-        renderTodo(); // Render ulang daftar todo setelah menghapus
-    });
-
-    noButton.addEventListener('click', () => {
-        document.querySelector('.popupContainer').remove();
-        showTodoPopup(todoId);
-});
-}
 
 // ======================
 // 5. Event Listener dan Inisialisasi Aplikasi
@@ -474,6 +500,8 @@ newTodoInput.addEventListener('keyup', (event) => {
 addTodoButton.addEventListener('click', addTodo);
 newTodoInput.value = '';
 
+searchBar.addEventListener('input', searchTodo);
+
 todoContainer.addEventListener('click', (event) => {
     const targetParent = findParentByClass(event.target, 'todoCard');
     // console.log(targetParent);
@@ -485,3 +513,4 @@ todoContainer.addEventListener('click', (event) => {
 
 // Render todo list saat aplikasi dimuat
 renderTodo();
+
