@@ -105,9 +105,15 @@ function toggleSidebar() {
         // Append sidebar to body and push todoContainer
         document.querySelector('main').prepend(sidebar);
         document.querySelector('main').style.display = 'grid';
-        document.querySelector('main').style.gridTemplateColumns = '1fr 1fr';
+        document.querySelector('main').style.gridTemplateColumns = '250px auto';
+        document.querySelector('main').style.gridTemplateRows = 'auto auto';
+        document.querySelector('.newTodo').style.gridColumn = '2';
+        document.querySelector('.newTodo').style.gridRow = '1';
+        document.querySelector('.todoContainer').style.gridColumn = '2';
+        document.querySelector('.todoContainer').style.gridRow = '2';
         sidebar.style.gridRow = '1 / 3';
-        sidebar.style.width = '250px';
+        sidebar.style.gridColumn = '1';
+        // sidebar.style.width = '250px';
         // todoContainer.style.marginLeft = '250px'; // Adjust the space for sidebar
     } else {
         // Remove sidebar and reset todoContainer margin
@@ -129,6 +135,8 @@ menuButton.addEventListener('click', toggleSidebar);
  * @returns {undefined}
  */
 function renderTodo() {
+    document.querySelector('header').style.display = '';
+    document.querySelector('main').style.display = '';
     todoContainer.innerHTML = ''; // Bersihkan container sebelum render ulang
     todoList.forEach(element => {
         let todoCard = createTodoCard(element.id, element.title, element.items);
@@ -392,6 +400,7 @@ function deleteTodo(todoId) {
 // 5. FUNGSI POPUP
 // ======================
 
+
 /**
  * Menampilkan popup untuk mengedit sebuah todo.
  *
@@ -400,12 +409,12 @@ function deleteTodo(todoId) {
  * @returns {void} Tidak mengembalikan apa-apa.
  */
 function showTodoPopup(todoCardId) {
+
     const todo = todoList.find(({ id }) => id === parseInt(todoCardId));
 
     if (todo) {
         const popupContainer = document.createElement('div');
         popupContainer.className = 'popupContainer';
-
         const popupContent = document.createElement('div');
         popupContent.className = 'popupContent';
         popupContent.id = todoCardId;
@@ -420,6 +429,11 @@ function showTodoPopup(todoCardId) {
          *              mengklik di luar area popup. Jika user mengklik di
          *              dalam area popup, maka tidak terjadi apa-apa.
          */
+
+        if (window.innerWidth <= 600) {
+            document.querySelector('header').style.display = 'none';
+            document.querySelector('main').style.display = 'none';
+        }
         popupContainer.onclick = ({ target }) => {
             if (!popupContent.contains(target)) {
                 popupContainer.remove();
@@ -451,11 +465,10 @@ function showTodoPopup(todoCardId) {
 function createPopupButtons(todoId) {
     // Create a div element to serve as the container for the buttons
     const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'buttonContainer';
 
     // Define an array of button data, including button text and click event handlers
     const buttonsData = [
-        { text: 'Import' }, // Button for importing (functionality not implemented)
-        { text: 'Export' }, // Button for exporting (functionality not implemented)
         { 
             text: 'Delete', 
             // The 'Delete' button has an event listener that calls deleteTodo with the provided todoId
@@ -464,7 +477,10 @@ function createPopupButtons(todoId) {
         { 
             text: 'Close', 
             // The 'Close' button has an event listener that removes the popup container from the DOM
-            onClick: () => document.querySelector('.popupContainer').remove() 
+            onClick: () => {
+                document.querySelector('.popupContainer').remove();
+                renderTodo();
+            }
         }
     ];
 
