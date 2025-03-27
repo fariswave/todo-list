@@ -80,30 +80,30 @@ function findParentByClass(element, className) {
 // 4. Fungsi Utama - Manajemen Todo
 // ======================
 /**
- * Menampilkan atau menyembunyikan sidebar yang berisi daftar judul todo.
+ * Toggle the visibility of the sidebar containing the list of todo titles.
  *
- * @description Jika sidebar tidak ada, buat dan tampilkan sidebar dengan judul-judul todo. Jika sidebar ada, hapus sidebar.
- *              Saat judul todo diklik, tampilkan popup todo yang sesuai tanpa menghilangkan sidebar.
+ * @description If the sidebar does not exist, create and show it with the list of todo titles.
+ *              If the sidebar exists, remove it and reset the todo container margin.
+ *              When a todo title is clicked, show the corresponding todo popup without hiding the sidebar.
  */
 function toggleSidebar() {
-    let sidebar = document.querySelector('.sidebar');
+    const sidebar = document.querySelector('.sidebar');
 
     if (!sidebar) {
-        // Create sidebar element
-        sidebar = document.createElement('div');
-        sidebar.className = 'sidebar';
+        // Create sidebar element and populate it with todo titles
+        const sidebarElement = document.createElement('div');
+        sidebarElement.className = 'sidebar';
 
-        // Populate sidebar with todo titles
         todoList.forEach(todo => {
             const todoTitleElement = document.createElement('div');
             todoTitleElement.className = 'sidebarTodoTitle';
             todoTitleElement.innerText = todo.title;
             todoTitleElement.addEventListener('click', () => showTodoPopup(todo.id));
-            sidebar.prepend(todoTitleElement);
+            sidebarElement.prepend(todoTitleElement);
         });
 
-        // Append sidebar to body and push todoContainer
-        document.querySelector('main').prepend(sidebar);
+        // Append sidebar to main and update layout
+        document.querySelector('main').prepend(sidebarElement);
         document.querySelector('main').style.display = 'grid';
         document.querySelector('main').style.gridTemplateColumns = '250px auto';
         document.querySelector('main').style.gridTemplateRows = 'auto auto';
@@ -111,14 +111,11 @@ function toggleSidebar() {
         document.querySelector('.newTodo').style.gridRow = '1';
         document.querySelector('.todoContainer').style.gridColumn = '2';
         document.querySelector('.todoContainer').style.gridRow = '2';
-        sidebar.style.gridRow = '1 / 3';
-        sidebar.style.gridColumn = '1';
-        // sidebar.style.width = '250px';
-        // todoContainer.style.marginLeft = '250px'; // Adjust the space for sidebar
+        sidebarElement.style.gridRow = '1 / 3';
+        sidebarElement.style.gridColumn = '1';
     } else {
-        // Remove sidebar and reset todoContainer margin
+        // Remove sidebar and reset layout
         sidebar.remove();
-        todoContainer.style.marginLeft = '0';
         document.querySelector('main').style.display = '';
     }
 }
@@ -154,7 +151,6 @@ function renderTodo() {
  * @returns {Element} Elemen todoCard yang telah dibuat.
  */
 function createTodoCard(id, title, items) {
-    // console.log("items grabbed by createTodoCard", items);
     let todoCard = document.createElement("div");
     todoCard.classList.add("todoCard");
     todoCard.id = id;
@@ -163,12 +159,12 @@ function createTodoCard(id, title, items) {
     todoTitle.classList.add("todoTitle");
     todoTitle.innerText = title;
 
-    let todoItems = document.createElement("ul");
-    todoItems.classList.add("todoItems");
-    todoItems.appendChild(createTaskList(id, items));
+    // let todoItems = document.createElement("ul");
+    // todoItems.classList.add("todoItems");
+    // todoItems.appendChild(createTaskList(items));
 
     todoCard.appendChild(todoTitle);
-    todoCard.appendChild(todoItems);
+    todoCard.appendChild(createTaskList(items));
 
     return todoCard;
 }
@@ -177,28 +173,21 @@ function createTodoCard(id, title, items) {
  * Searches for todos based on the keyword input in the search bar and displays the results in the todoContainer element.
  */
 function searchTodo() {
-    // Log the function call for debugging purposes
-    console.log("searchTodo function called");
-
     // Get the keyword from the search bar, convert it to lowercase for case-insensitive search
     let keyword = searchBar.value.toLowerCase();
-    console.log("keyword:", keyword);
 
     // Filter the todo list to find todos that match the keyword in their title or any of their items
     let result = todoList.filter(todo => {
-        console.log("checking todo:", todo);
         // Check if the todo title includes the keyword or any item's text includes the keyword
         return todo.title.toLowerCase().includes(keyword) || 
                todo.items.some(item => item.text.toLowerCase().includes(keyword));
     });
-    console.log("result:", result);
 
     // Clear the todoContainer before rendering the filtered results
     todoContainer.innerHTML = '';
 
     // Iterate over each filtered todo and render it
     result.forEach(element => {
-        console.log("rendering todo:", element);
         // Create a todo card element using the todo's id, title, and items
         let todoCard = createTodoCard(element.id, element.title, element.items);
         // Prepend the newly created todo card to the todoContainer
@@ -341,24 +330,44 @@ function createTitle(todo) {
     return title;
 }
 
-/**
- * Creates an unordered list element for the task list of a todo item in the todo popup.
- *
- * @param {Object} todo - The todo item whose task list will be displayed in the unordered list element.
- *
- * @description Creates an unordered list element with list items for each task in the todo item's task list and appends a new task input element at the end of the list.
- *
- * @returns {Element} The unordered list element with the task list of the todo item.
- */
-function createTaskList(id, itemsArray) {
-    const itemList = document.createElement('ul');  
 
-    if (itemsArray.length > 0) {
-        itemsArray.forEach(item => {
-            const task = createTask(item);
-            itemList.appendChild(task);
-        });    
-    } else {
+/**
+ * Creates an unordered list of task items from an array of task objects.
+ *
+ * @param {Array<Object>} itemsArray - Array of task objects with properties `id`, `text`, and `completed`.
+ *
+ * @description Separates the tasks into two arrays, one for completed tasks and one for uncompleted tasks.
+ *              Reverses the uncompleted tasks array so that the most recently added task is at the top of the list.
+ *              Appends the completed tasks to the unordered list.
+ *              If the task list is empty, appends a message to the unordered list indicating that there are no tasks available.
+ *
+ * @returns {Element} The unordered list of task items.
+ */
+function createTaskList(itemsArray) {
+    const itemList = document.createElement('ul');  
+    itemList.classList.add('todoItems');
+
+    const uncompletedTasks = [];
+    const completedTasks = [];
+
+    // Separate the tasks into two arrays, one for completed tasks and one for uncompleted tasks
+    itemsArray.forEach(item => {
+        const task = createTask(item);
+        if (item.completed) {
+            completedTasks.push(task);
+        } else {
+            uncompletedTasks.push(task);
+        }
+    });
+
+    // Reverse the uncompleted tasks array so that the most recently added task is at the top of the list
+    uncompletedTasks.reverse().forEach(task => itemList.appendChild(task));
+
+    // Append the completed tasks to the unordered list
+    completedTasks.forEach(task => itemList.appendChild(task));
+
+    // If the task list is empty, append a message to the unordered list indicating that there are no tasks available
+    if (itemsArray.length === 0) {
         const noTasksMessage = document.createElement('p');
         noTasksMessage.innerText = 'No tasks available';
         itemList.appendChild(noTasksMessage);
@@ -385,7 +394,6 @@ function deleteTodo(todoId) {
         const todoIndex = todoList.findIndex(todo => todo.id === todoId);
         todoList.splice(todoIndex, 1);
         setLocalStorage();
-        // deletePopup.remove();
         document.querySelector('.popupContainer').remove();
         renderTodo(); // Render ulang daftar todo setelah menghapus
     });
@@ -442,7 +450,7 @@ function showTodoPopup(todoCardId) {
 
         popupContent.append(
             createTitle(todo),
-            createTaskList(todoCardId, todo.items),
+            createTaskList(todo.items),
             createNewTaskInput(todoCardId),
             createPopupButtons(todoCardId)
         );
@@ -508,7 +516,7 @@ function addNewTask(id, newTask) {
                 completed: false
             });
             setLocalStorage();
-            document.querySelector('.popupContainer'),remove();
+            document.querySelector('.popupContainer').remove();
             showTodoPopup(id);
             renderTodo();
         }
@@ -563,10 +571,8 @@ searchBar.addEventListener('input', searchTodo);
 
 todoContainer.addEventListener('click', (event) => {
     const targetParent = findParentByClass(event.target, 'todoCard');
-    // console.log(targetParent);
     if (targetParent) {
         showTodoPopup(targetParent.id);
-        // console.log("id grabbed by pop up container listener", targetParent.id);
     }
 });
 
