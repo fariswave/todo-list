@@ -79,6 +79,47 @@ function findParentByClass(element, className) {
 // ======================
 // 4. Fungsi Utama - Manajemen Todo
 // ======================
+/**
+ * Menampilkan atau menyembunyikan sidebar yang berisi daftar judul todo.
+ *
+ * @description Jika sidebar tidak ada, buat dan tampilkan sidebar dengan judul-judul todo. Jika sidebar ada, hapus sidebar.
+ *              Saat judul todo diklik, tampilkan popup todo yang sesuai tanpa menghilangkan sidebar.
+ */
+function toggleSidebar() {
+    let sidebar = document.querySelector('.sidebar');
+
+    if (!sidebar) {
+        // Create sidebar element
+        sidebar = document.createElement('div');
+        sidebar.className = 'sidebar';
+
+        // Populate sidebar with todo titles
+        todoList.forEach(todo => {
+            const todoTitleElement = document.createElement('div');
+            todoTitleElement.className = 'sidebarTodoTitle';
+            todoTitleElement.innerText = todo.title;
+            todoTitleElement.addEventListener('click', () => showTodoPopup(todo.id));
+            sidebar.prepend(todoTitleElement);
+        });
+
+        // Append sidebar to body and push todoContainer
+        document.querySelector('main').prepend(sidebar);
+        document.querySelector('main').style.display = 'grid';
+        document.querySelector('main').style.gridTemplateColumns = '1fr 1fr';
+        sidebar.style.gridRow = '1 / 3';
+        sidebar.style.width = '250px';
+        // todoContainer.style.marginLeft = '250px'; // Adjust the space for sidebar
+    } else {
+        // Remove sidebar and reset todoContainer margin
+        sidebar.remove();
+        todoContainer.style.marginLeft = '0';
+        document.querySelector('main').style.display = '';
+    }
+}
+
+// Attach event listener to menuButton
+menuButton.addEventListener('click', toggleSidebar);
+
 
 /**
  * Render todo list ke dalam elemen dengan kelas todoContainer.
@@ -178,6 +219,9 @@ function addTodo() {
         };
         todoList.push(newTodo);
         setLocalStorage();
+        if (document.querySelector('.sidebar')) {
+            toggleSidebar()
+        };
         showTodoPopup(newTodo.id);
         renderTodo(); // Render ulang daftar todo
         newTodoInput.value = '';
@@ -448,8 +492,7 @@ function addNewTask(id, newTask) {
                 completed: false
             });
             setLocalStorage();
-            const popupContainer = document.querySelector('.popupContainer');
-            popupContainer.remove();
+            document.querySelector('.popupContainer'),remove();
             showTodoPopup(id);
             renderTodo();
         }
